@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type Accounts struct {
+type Account struct {
 	ID        int64     `db:"id"`
 	Owner     string    `db:"owner"`
 	Balance   int64     `db:"balance"`
@@ -16,7 +16,7 @@ type Accounts struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
-type Entries struct {
+type Entry struct {
 	ID        int64 `db:"id"`
 	AccountID int64 `db:"account_id"`
 	// can be negative or positive
@@ -24,7 +24,7 @@ type Entries struct {
 	CreatedAt time.Time `db:"created_at"`
 }
 
-type Transfers struct {
+type Transfer struct {
 	ID            int64 `db:"id"`
 	FromAccountID int64 `db:"from_account_id"`
 	ToAccountID   int64 `db:"to_account_id"`
