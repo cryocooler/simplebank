@@ -79,3 +79,50 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, accounts)
 
 }
+
+func (server *Server) deleteAccount(ctx *gin.Context) {
+	var req GetAccountRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusNoContent, nil)
+		return
+	}
+	err := server.store.DeleteAccount(ctx, req.ID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+
+}
+
+type UpdateAccountUri struct {
+	ID int64 `uri:"id" binding:"required"`
+}
+
+type UpdateAccountJson struct {
+	Balance int64 `json:"balance" binding:"required"`
+}
+
+func (server *Server) updateAccount(ctx *gin.Context) {
+	var uri UpdateAccountUri
+	var json UpdateAccountJson
+	if err := ctx.ShouldBindUri(&uri); err != nil {
+		ctx.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	if err := ctx.ShouldBindJSON(&json); err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	arg := db.UpdateAccountParams{
+		ID:      uri.ID,
+		Balance: json.Balance,
+	}
+
+	account, err := server.store.UpdateAccount(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	ctx.JSON(http.StatusOK, account)
+}
