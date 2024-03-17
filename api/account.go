@@ -83,12 +83,13 @@ func (server *Server) listAccounts(ctx *gin.Context) {
 func (server *Server) deleteAccount(ctx *gin.Context) {
 	var req GetAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
-		ctx.JSON(http.StatusNoContent, nil)
+		ctx.JSON(http.StatusBadRequest, nil)
 		return
 	}
 	err := server.store.DeleteAccount(ctx, req.ID)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
+	if err == sql.ErrNoRows {
+		ctx.JSON(http.StatusNotFound, err)
+		return
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
