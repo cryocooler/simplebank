@@ -96,7 +96,7 @@ func (server *Server) deleteAccount(ctx *gin.Context) {
 }
 
 type UpdateAccountUri struct {
-	ID int64 `uri:"id" binding:"required"`
+	ID int64 `uri:"id" binding:"required min=1"`
 }
 
 type UpdateAccountJson struct {
