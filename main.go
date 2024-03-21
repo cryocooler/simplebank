@@ -65,7 +65,7 @@ func runGatewayServer(config util.Config, store db.Store) {
 		log.Fatal("could not create server ", err)
 	}
 
-	runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+	jsonOption := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
 		MarshalOptions: protojson.MarshalOptions{
 			UseProtoNames: true,
 		},
@@ -74,7 +74,7 @@ func runGatewayServer(config util.Config, store db.Store) {
 		},
 	})
 
-	grpcMux := runtime.NewServeMux()
+	grpcMux := runtime.NewServeMux(jsonOption)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
