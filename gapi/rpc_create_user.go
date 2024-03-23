@@ -2,12 +2,15 @@ package gapi
 
 import (
 	"context"
+	"time"
 
 	db "github.com/cryocooler/simplebank/db/sqlc"
 	"github.com/cryocooler/simplebank/pb"
 	"github.com/cryocooler/simplebank/util"
 	"github.com/cryocooler/simplebank/val"
+	"github.com/cryocooler/simplebank/worker"
 	"github.com/gogo/status"
+	"github.com/hibiken/asynq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 )
@@ -38,6 +41,22 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		}
 		return nil, status.Errorf(codes.Internal, "failed to create user: %s", err)
 
+	}
+	// this current implementation fails if task cant be distributed, but the caller will already have created an user in DB.
+	// so they cannot retry the task. Retry results in duplicate user record in the db.
+	// we need to create the user record and distribute the task in a single transaction.
+	taskPayload := &worker.PayloadSendVerifyEmail{
+		Username: user.Username,
+	}
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(10 * time.Second),
+		asynq.Queue(worker.QueueCritical),
+	}
+
+	err = server.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to distribute task to send verify email")
 	}
 
 	rsp := &pb.CreateUserResponse{

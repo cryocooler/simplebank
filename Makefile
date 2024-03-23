@@ -19,6 +19,8 @@ migratedown:
 migratedown1:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
 
+redis:
+	docker run --name redis -p 6379:6379 -d redis:7-alpine
 
 sqlc:
 	sqlc generate
@@ -42,4 +44,5 @@ proto:
 evans:
 	evans --host localhost --port 9090 -r repl
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock migratedown1 migrateup1 proto evans
+
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server mock migratedown1 migrateup1 proto evans redis
