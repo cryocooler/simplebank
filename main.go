@@ -43,13 +43,14 @@ func main() {
 
 	store := db.NewStore(conn)
 
-	redisOpt := asynq.RedisClientOpt{
-		Addr: config.RedisAddress,
-	}
-	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
-	go runTaskProcessor(redisOpt, store)
-	go runGatewayServer(config, store, taskDistributor)
-	runGrpcServer(config, store, taskDistributor)
+	// redisOpt := asynq.RedisClientOpt{
+	// 	Addr: config.RedisAddress,
+	// }
+	// taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
+	// go runTaskProcessor(redisOpt, store)
+	// go runGatewayServer(config, store, taskDistributor)
+	// go runGrpcServer(config, store, taskDistributor)
+	runGinServer(config, store)
 
 }
 
